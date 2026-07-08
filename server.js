@@ -1,9 +1,12 @@
 // Team Roadmap — Backend Server
 // -------------------------------------------------
-// Simple Express server that stores the roadmap data in a JSON file
-// on disk (data.json). Every client (teammate) that opens the page
-// talks to this same server, so edits made by one person show up for
-// everyone else — no per-browser memory, no manual JSON passing.
+// Stores the roadmap data either in:
+//   - Upstash Redis (if UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN
+//     env vars are set) — survives server restarts/spin-downs, good for
+//     hosting on Render's free tier.
+//   - A local data.json file (fallback) — fine for running on your own
+//     machine, but on Render's free tier this resets whenever the
+//     service spins down from inactivity, since the disk isn't persistent.
 // -------------------------------------------------
 
 const express = require("express");
@@ -14,12 +17,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, "data.json");
 const DEFAULT_FILE = path.join(__dirname, "default-data.json");
+const STATE_KEY = "roadmap-state";
+
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const USE_REDIS = Boolean(UPSTASH_URL && UPSTASH_TOKEN);
 
 app.use(express.json({ limit: "2mb" }));
 
-// Allow the page to be hosted separately from the API if needed
-// (e.g. frontend on Netlify, backend on Render). Same-origin setups
-// don't need this, but it's harmless to leave on.
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,OPTIONS");
@@ -28,35 +33,81 @@ app.use((req, res, next) => {
   next();
 });
 
-function readData() {
-  const raw = fs.readFileSync(DATA_FILE, "utf-8");
-  return JSON.parse(raw);
+function loadDefaults() {
+  return JSON.parse(fs.readFileSync(DEFAULT_FILE, "utf-8"));
 }
 
-function writeData(data) {
-  // Basic shape check so a broken payload can't corrupt the file
+function isValidState(data) {
   const requiredKeys = ["hero", "checklist", "foundation", "modules", "timeline", "tips"];
-  const ok = data && typeof data === "object" && requiredKeys.every(k => k in data);
-  if (!ok) throw new Error("Payload is missing required fields");
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
+  return data && typeof data === "object" && requiredKeys.every(k => k in data);
+}
+
+// --- Upstash Redis storage ---
+async function redisGet() {
+  const res = await fetch(`${UPSTASH_URL}/get/${STATE_KEY}`, {
+    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
+  });
+  if (!res.ok) throw new Error(`Upstash GET failed: ${res.status}`);
+  const data = await res.json();
+  return data.result ? JSON.parse(data.result) : null;
+}
+
+async function redisSet(value) {
+  const res = await fetch(`${UPSTASH_URL}/set/${STATE_KEY}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${UPSTASH_TOKEN}`,
+      "Content-Type": "text/plain",
+    },
+    body: JSON.stringify(value),
+  });
+  if (!res.ok) throw new Error(`Upstash SET failed: ${res.status}`);
+}
+
+// --- Local file storage (fallback for local dev) ---
+function fileGet() {
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
+  } catch (err) {
+    return null;
+  }
+}
+
+function fileSet(value) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(value, null, 2), "utf-8");
+}
+
+// --- Unified storage interface ---
+async function readState() {
+  let data = USE_REDIS ? await redisGet() : fileGet();
+  if (!data) {
+    // first run / empty store — seed with the default content
+    data = loadDefaults();
+    await writeState(data);
+  }
+  return data;
+}
+
+async function writeState(data) {
+  if (!isValidState(data)) throw new Error("Payload is missing required fields");
+  if (USE_REDIS) await redisSet(data);
+  else fileSet(data);
 }
 
 // --- API routes ---
 
-// Get the current shared roadmap state
-app.get("/api/state", (req, res) => {
+app.get("/api/state", async (req, res) => {
   try {
-    res.json(readData());
+    res.json(await readState());
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "อ่านข้อมูลไม่สำเร็จ" });
   }
 });
 
-// Replace the entire shared state (used after any add/edit/delete)
-app.put("/api/state", (req, res) => {
+app.put("/api/state", async (req, res) => {
   try {
-    writeData(req.body);
+    await writeState(req.body);
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
@@ -64,11 +115,10 @@ app.put("/api/state", (req, res) => {
   }
 });
 
-// Reset the shared state back to the original seed content
-app.post("/api/state/reset", (req, res) => {
+app.post("/api/state/reset", async (req, res) => {
   try {
-    const defaults = JSON.parse(fs.readFileSync(DEFAULT_FILE, "utf-8"));
-    writeData(defaults);
+    const defaults = loadDefaults();
+    await writeState(defaults);
     res.json(defaults);
   } catch (err) {
     console.error(err);
@@ -80,6 +130,6 @@ app.post("/api/state/reset", (req, res) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 app.listen(PORT, () => {
-  console.log(`✅ Roadmap server running: http://localhost:${PORT}`);
-  console.log(`   Teammates on the same network can use your LAN IP instead of localhost.`);
+  console.log(`✅ Roadmap server running on port ${PORT}`);
+  console.log(`   Storage: ${USE_REDIS ? "Upstash Redis (persistent)" : "local data.json (resets on redeploy/spin-down on Render free tier)"}`);
 });
