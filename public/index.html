@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Blueprint — Roadmap ทีม AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d2136;
+    --bg-deep:#0a1a2b;
+    --grid:#173453;
+    --panel:#12293f;
+    --panel-line:#2a4d6e;
+    --ink:#eaf3f5;
+    --muted:#88a3b8;
+    --cyan:#6fe7dc;
+    --amber:#ffb454;
+    --amber-dim:#8a6a3a;
+    --danger:#ff8a80;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans Thai', sans-serif;
+    font-weight:400;
+    line-height:1.6;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 36px 36px;
+    padding-top:52px; /* space for sticky control bar */
+  }
+  .mono{font-family:'JetBrains Mono', monospace;}
+  a{color:var(--cyan);}
+
+  /* corner brackets — signature element */
+  .brackets{position:relative;}
+  .brackets::before,.brackets::after,
+  .brackets .bl,.brackets .br{
+    content:"";
+    position:absolute;
+    width:14px;height:14px;
+    border-color:var(--cyan);
+    opacity:.85;
+  }
+  .brackets::before{top:-1px;left:-1px;border-top:2px solid;border-left:2px solid;}
+  .brackets::after{top:-1px;right:-1px;border-top:2px solid;border-right:2px solid;}
+  .brackets .bl{bottom:-1px;left:-1px;border-bottom:2px solid;border-left:2px solid;}
+  .brackets .br{bottom:-1px;right:-1px;border-bottom:2px solid;border-right:2px solid;}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  /* ---- STICKY CONTROL BAR ---- */
+  .controlbar{
+    position:fixed;top:0;left:0;right:0;height:52px;z-index:200;
+    background:var(--bg-deep);border-bottom:1px solid var(--panel-line);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 18px;gap:12px;flex-wrap:wrap;
+  }
+  .controlbar .left,.controlbar .right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .edit-toggle{
+    display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);
+  }
+  .switch{
+    width:36px;height:20px;border-radius:20px;background:var(--panel-line);
+    position:relative;transition:background .15s;flex:none;
+  }
+  .switch::after{
+    content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;
+    background:var(--ink);border-radius:50%;transition:transform .15s;
+  }
+  body.edit-mode .switch{background:var(--cyan);}
+  body.edit-mode .switch::after{transform:translateX(16px);background:var(--bg-deep);}
+  body.edit-mode .edit-toggle{color:var(--cyan);}
+  .mode-pill{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.06em;
+    padding:3px 9px;border-radius:10px;border:1px solid var(--panel-line);color:var(--muted);
+  }
+  body.edit-mode .mode-pill{border-color:var(--amber);color:var(--amber);}
+
+  /* elements only visible while editing */
+  .edit-only{display:none;}
+  body.edit-mode .edit-only{display:inline-flex;}
+  body.edit-mode .edit-only.block{display:block;}
+  body.edit-mode .edit-only.flex-row{display:flex;}
+
+  [contenteditable="true"]{
+    outline:none;border-radius:2px;
+  }
+  body.edit-mode [data-editable]{
+    cursor:text;
+  }
+  body.edit-mode [data-editable]:hover{
+    background:rgba(111,231,220,.08);
+    box-shadow:0 0 0 1px var(--panel-line);
+  }
+  body.edit-mode [data-editable]:focus{
+    background:rgba(111,231,220,.1);
+    box-shadow:0 0 0 1px var(--cyan);
+  }
+
+  .btn{
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;
+    background:transparent;color:var(--cyan);border:1px solid var(--cyan);
+    padding:8px 14px;border-radius:2px;cursor:pointer;letter-spacing:.03em;
+    transition:background .15s,color .15s;white-space:nowrap;
+  }
+  .btn:hover{background:var(--cyan);color:var(--bg-deep);}
+  .btn.ghost{color:var(--muted);border-color:var(--panel-line);}
+  .btn.ghost:hover{background:var(--panel-line);color:var(--ink);}
+  .btn.danger{color:var(--danger);border-color:#7a3f3a;}
+  .btn.danger:hover{background:var(--danger);color:#2a0d0a;}
+  .btn.small{font-size:11px;padding:6px 10px;}
+  .file-btn{position:relative;overflow:hidden;display:inline-block;}
+  .file-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+
+  /* HERO */
+  .hero{
+    padding:90px 24px 70px;
+    border-bottom:1px dashed var(--panel-line);
+    text-align:center;
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:.25em;
+    font-size:12px;
+    color:var(--amber);
+    text-transform:uppercase;
+    display:inline-block;
+  }
+  .hero h1{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:800;
+    font-size:clamp(32px,5.2vw,58px);
+    margin:18px auto 20px;
+    max-width:820px;
+    line-height:1.2;
+    color:var(--ink);
+  }
+  .hero p.sub{
+    max-width:620px;
+    margin:0 auto;
+    color:var(--muted);
+    font-size:16px;
+  }
+  .hero-meta{
+    display:flex;justify-content:center;gap:36px;
+    margin-top:42px;flex-wrap:wrap;
+  }
+  .hero-meta-item{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);position:relative;padding:0 4px;}
+  .hero-meta-item b{display:block;color:var(--cyan);font-size:20px;margin-bottom:4px;}
+  .hero-meta-item .item-actions{top:-14px;right:-14px;}
+  .hero-add-meta{margin-top:16px;}
+
+  /* generic small item-actions (edit/delete icons) reused everywhere */
+  .item-actions{
+    position:absolute;display:none;gap:5px;
+  }
+  body.edit-mode .item-actions{display:flex;}
+  .icon-btn{
+    width:24px;height:24px;border-radius:2px;border:1px solid var(--panel-line);
+    background:var(--bg-deep);color:var(--muted);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:12px;
+    transition:border-color .15s,color .15s;flex:none;
+  }
+  .icon-btn:hover{color:var(--ink);border-color:var(--cyan);}
+  .icon-btn.del:hover{color:var(--danger);border-color:#7a3f3a;}
+
+  /* SHEET section styling */
+  .sheet{padding:64px 24px;border-bottom:1px dashed var(--panel-line);}
+  .sheet-head{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    max-width:1080px;margin:0 auto 34px;
+    border-bottom:1px solid var(--panel-line);
+    padding-bottom:14px;
+  }
+  .sheet-head h2{
+    font-family:'JetBrains Mono',monospace;
+    font-size:clamp(20px,2.6vw,28px);
+    margin:0;color:var(--ink);
+    font-weight:700;
+  }
+  .sheet-head .num{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:12px;letter-spacing:.15em;}
+  .sheet-desc{max-width:1080px;margin:-20px auto 34px;color:var(--muted);font-size:14.5px;}
+
+  .section-toolbar{max-width:1080px;margin:0 auto 18px;display:flex;justify-content:flex-end;}
+
+  /* PHASE 0 checklist */
+  .checklist{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
+  .check-item{
+    background:var(--panel);border:1px solid var(--panel-line);
+    padding:16px 40px 16px 18px;border-radius:2px;font-size:14.5px;
+    display:flex;gap:12px;align-items:flex-start;position:relative;
+  }
+  .check-item .box{
+    flex:none;width:16px;height:16px;border:2px solid var(--cyan);margin-top:2px;
+  }
+  .check-item .item-actions{top:10px;right:8px;}
+
+  /* FOUNDATION project timeline (real sequence -> numbered) */
+  .foundation{max-width:1080px;margin:0 auto;position:relative;padding-left:26px;}
+  .foundation::before{
+    content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;
+    background:repeating-linear-gradient(var(--panel-line) 0 6px, transparent 6px 12px);
+  }
+  .f-step{position:relative;padding:0 40px 34px 30px;}
+  .f-step:last-child{padding-bottom:0;}
+  .f-step::before{
+    content:attr(data-n);
+    position:absolute;left:-26px;top:0;
+    width:22px;height:22px;border-radius:50%;
+    background:var(--bg-deep);border:2px solid var(--cyan);
+    color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:11px;
+    display:flex;align-items:center;justify-content:center;font-weight:700;
+  }
+  .f-step h3{margin:0 0 6px;font-size:16.5px;color:var(--ink);}
+  .f-step p{margin:0;color:var(--muted);font-size:14.5px;}
+  .f-step .tag{
+    display:inline-block;margin-top:8px;font-family:'JetBrains Mono',monospace;
+    font-size:11px;color:var(--amber);border:1px solid var(--amber-dim);
+    padding:2px 8px;border-radius:2px;
+  }
+  .f-step .item-actions{top:0;right:0;}
+
+  /* MODULE CARDS grid */
+  .grid{
+    max-width:1080px;margin:0 auto;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:18px;
+  }
+  .card{
+    background:var(--panel);border:1px solid var(--panel-line);
+    padding:22px 20px 20px;position:relative;border-radius:2px;
+  }
+  .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .card-id{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:12px;letter-spacing:.1em;}
+  .diff{font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:2px 8px;border-radius:10px;border:1px solid;}
+  .diff.easy{color:#8be28b;border-color:#3c6b3c;}
+  .diff.mid{color:var(--amber);border-color:var(--amber-dim);}
+  .diff.hard{color:var(--danger);border-color:#7a3f3a;}
+  .card h3{margin:0 0 8px;font-size:16.5px;color:var(--ink);}
+  .card p{margin:0 0 12px;color:var(--muted);font-size:13.8px;}
+  .stack{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);margin-bottom:8px;}
+  .stack b{color:var(--cyan);font-weight:500;}
+  .why{
+    font-size:12.8px;color:#c9d8e0;border-top:1px dashed var(--panel-line);
+    padding-top:10px;margin-top:4px;
+  }
+  .why b{color:var(--amber);font-weight:600;}
+  .new-badge{
+    position:absolute;top:-9px;right:14px;
+    background:var(--amber);color:#241a0a;font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;font-weight:700;padding:2px 8px;letter-spacing:.08em;border-radius:2px;
+  }
+  .card .item-actions{top:10px;right:10px;}
+  .lib-empty{
+    max-width:1080px;margin:0 auto;text-align:center;color:var(--muted);
+    font-size:14px;padding:40px 20px;border:1px dashed var(--panel-line);
+  }
+
+  /* TIMELINE strip */
+  .timeline{max-width:1080px;margin:0 auto;overflow-x:auto;padding-bottom:10px;}
+  .timeline-track{display:flex;min-width:760px;position:relative;}
+  .timeline-track::before{
+    content:"";position:absolute;top:19px;left:0;right:0;height:2px;background:var(--panel-line);
+  }
+  .t-week{flex:1;text-align:center;position:relative;padding:34px 22px 0;}
+  .t-week::before{
+    content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);
+    width:16px;height:16px;border-radius:50%;background:var(--bg-deep);border:2px solid var(--cyan);
+  }
+  .t-week .wk{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);}
+  .t-week .lbl{font-size:12.5px;margin-top:6px;padding:0 6px;color:var(--ink);}
+  .t-week .item-actions{top:0;right:0;justify-content:center;}
+  .timeline-add{min-width:120px;display:flex;align-items:center;justify-content:center;padding-top:34px;}
+
+  /* TIPS list */
+  .tips{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+  .tip{background:var(--panel);border:1px solid var(--panel-line);padding:18px 40px 18px 18px;border-radius:2px;position:relative;}
+  .tip .k{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:12px;letter-spacing:.06em;display:block;margin-bottom:6px;}
+  .tip p{margin:0;font-size:13.8px;color:var(--muted);}
+  .tip .item-actions{top:10px;right:8px;}
+
+  footer{padding:40px 24px;text-align:center;color:var(--muted);font-size:12.5px;font-family:'JetBrains Mono',monospace;}
+
+  /* ---- MODAL ---- */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(6,15,25,.72);
+    display:none;align-items:flex-start;justify-content:center;
+    padding:80px 16px 40px;overflow-y:auto;z-index:300;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--panel);border:1px solid var(--panel-line);
+    max-width:560px;width:100%;padding:28px 26px 24px;border-radius:2px;position:relative;
+  }
+  .modal h3{
+    font-family:'JetBrains Mono',monospace;margin:0 0 20px;font-size:18px;color:var(--ink);
+    border-bottom:1px solid var(--panel-line);padding-bottom:12px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--amber);letter-spacing:.06em;margin-bottom:6px;text-transform:uppercase;
+  }
+  .field input[type=text],.field select,.field textarea{
+    width:100%;background:var(--bg-deep);border:1px solid var(--panel-line);
+    color:var(--ink);padding:10px 12px;font-family:'IBM Plex Sans Thai',sans-serif;
+    font-size:14px;border-radius:2px;
+  }
+  .field textarea{resize:vertical;min-height:56px;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--cyan);}
+  .field-row{display:flex;gap:12px;}
+  .field-row .field{flex:1;}
+  .field.checkbox{display:flex;align-items:center;gap:8px;}
+  .field.checkbox label{margin:0;}
+  .modal-actions{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:22px;padding-top:16px;border-top:1px dashed var(--panel-line);
+  }
+  .modal-actions .right{display:flex;gap:10px;}
+
+  @media (max-width:640px){
+    .sheet{padding:48px 18px;}
+    .hero{padding:64px 18px 50px;}
+    .controlbar{height:auto;padding:8px 12px;}
+    body{padding-top:88px;}
+  }
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+</style>
+</head>
+<body>
+
+  <!-- STICKY CONTROL BAR -->
+  <div class="controlbar">
+    <div class="left">
+      <label class="edit-toggle" id="editToggle">
+        <span class="switch"></span>
+        <span id="editToggleLabel">เปิดโหมดแก้ไข</span>
+      </label>
+      <span class="mode-pill" id="modePill">โหมดดูอย่างเดียว</span>
+      <span class="mode-pill" id="syncPill">🔄 กำลังเชื่อมต่อ...</span>
+    </div>
+    <div class="right">
+      <button class="btn ghost small" id="btnExportAll">↓ Export ทั้งหน้า (JSON)</button>
+      <span class="btn ghost small file-btn">↑ Import JSON<input type="file" id="fileImportAll" accept="application/json"></span>
+      <button class="btn ghost small" id="btnResetAll">↺ รีเซ็ตทั้งหมด</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="eyebrow" id="heroEyebrow" data-editable contenteditable="false">PROJECT BLUEPRINT · REV.A · TEAM BUILD</div>
+    <h1 id="heroTitle" data-editable contenteditable="false">Roadmap สร้างพอร์ตโฟลิโอ<br>+ คลังโปรเจกต์ AI กับเพื่อน</h1>
+    <p class="sub" id="heroSubtitle" data-editable contenteditable="false">แผนการทำงานแบบเป็นขั้นเป็นตอน เริ่มจากเว็บโชว์ผลงานที่ดึงโปรเจกต์จาก GitHub มาโชว์เคส แล้วค่อยๆ เติมโปรเจกต์ AI เล็กๆ เข้าไปทีละชิ้น เพื่อสร้างพอร์ตที่ทั้งลึกและกว้าง</p>
+    <div class="hero-meta" id="heroMeta"></div>
+    <div class="hero-add-meta edit-only"><button class="btn small" id="btnAddMeta">+ เพิ่มตัวเลขสรุป</button></div>
+  </section>
+
+  <!-- SHEET 01 : SETUP -->
+  <section class="sheet">
+    <div class="sheet-head">
+      <h2>01 · เตรียมทีมก่อนเริ่ม</h2>
+      <span class="num mono">SHEET 01/05</span>
+    </div>
+    <p class="sheet-desc">ทำสิ่งเหล่านี้ให้เสร็จก่อนเขียนโค้ดบรรทัดแรก จะช่วยลดปัญหางานชนกันทีหลัง</p>
+    <div class="section-toolbar edit-only"><button class="btn small" id="btnAddChecklist">+ เพิ่มรายการ</button></div>
+    <div class="checklist" id="checklistGrid"></div>
+  </section>
+
+  <!-- SHEET 02 : FOUNDATION PROJECT -->
+  <section class="sheet">
+    <div class="sheet-head">
+      <h2>02 · โปรเจกต์ฐาน: เว็บพอร์ตโฟลิโอ</h2>
+      <span class="num mono">SHEET 02/05</span>
+    </div>
+    <p class="sheet-desc">ทำอันนี้ก่อนเป็นอันดับแรก เพราะทุกโปรเจกต์ AI ที่ตามมาจะมีที่ลงโชว์ทันที</p>
+    <div class="section-toolbar edit-only"><button class="btn small" id="btnAddFoundation">+ เพิ่มขั้นตอน</button></div>
+    <div class="foundation" id="foundationList"></div>
+  </section>
+
+  <!-- SHEET 03 : MODULE LIBRARY -->
+  <section class="sheet">
+    <div class="sheet-head">
+      <h2>03 · คลังโปรเจกต์ AI ให้เลือกทำ</h2>
+      <span class="num mono">SHEET 03/05</span>
+    </div>
+    <p class="sheet-desc">ไม่ต้องทำเรียงลำดับ เลือกตามความสนใจ แต่แนะนำเริ่มจากอันที่ระดับ "ง่าย" ก่อนเพื่อสร้างความมั่นใจ เปิดโหมดแก้ไขด้านบนเพื่อเพิ่ม/แก้/ลบการ์ดได้</p>
+    <div class="section-toolbar edit-only"><button class="btn small" id="btnAddModule">+ เพิ่มโปรเจกต์</button></div>
+    <div class="grid" id="moduleGrid"></div>
+    <div class="lib-empty" id="libEmpty" style="display:none;">ยังไม่มีโปรเจกต์ในคลัง — เปิดโหมดแก้ไขแล้วกด "+ เพิ่มโปรเจกต์"</div>
+  </section>
+
+  <!-- SHEET 04 : SUGGESTED TIMELINE -->
+  <section class="sheet">
+    <div class="sheet-head">
+      <h2>04 · แผนเวลาแนะนำ</h2>
+      <span class="num mono">SHEET 04/05</span>
+    </div>
+    <p class="sheet-desc">ปรับตามเวลาว่างจริงของทีมได้ นี่คือจังหวะแนะนำที่ไม่โหลดเกินไป และมีของโชว์ทุก 2-3 สัปดาห์</p>
+    <div class="section-toolbar edit-only"><button class="btn small" id="btnAddTimeline">+ เพิ่มช่วงเวลา</button></div>
+    <div class="timeline">
+      <div class="timeline-track" id="timelineTrack"></div>
+    </div>
+  </section>
+
+  <!-- SHEET 05 : TEAM TIPS -->
+  <section class="sheet" style="border-bottom:none;">
+    <div class="sheet-head">
+      <h2>05 · เคล็ดลับทำงานเป็นทีม</h2>
+      <span class="num mono">SHEET 05/05</span>
+    </div>
+    <div class="section-toolbar edit-only"><button class="btn small" id="btnAddTip">+ เพิ่มเคล็ดลับ</button></div>
+    <div class="tips" id="tipsGrid"></div>
+  </section>
+
+  <footer>BLUEPRINT END · ปรับแก้ได้ตามจังหวะทีมจริง · ทำทีละสัปดาห์ ดีกว่าหยุดกลางทาง</footer>
+
+  <!-- MODAL: module -->
+  <div class="modal-backdrop" id="modalModuleBackdrop">
+    <div class="modal brackets">
+      <span class="bl"></span><span class="br"></span>
+      <h3 id="modalModuleTitle" class="mono">เพิ่มโปรเจกต์ใหม่</h3>
+      <form id="moduleForm">
+        <div class="field-row">
+          <div class="field">
+            <label>ชื่อโปรเจกต์</label>
+            <input type="text" id="f-name" required placeholder="เช่น AI ช่วยแปลภาษามือ">
+          </div>
+          <div class="field" style="max-width:140px;">
+            <label>ระดับ</label>
+            <select id="f-diff">
+              <option value="easy">ง่าย</option>
+              <option value="mid" selected>กลาง</option>
+              <option value="hard">ยาก</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>รายละเอียดสั้นๆ</label><textarea id="f-desc" required placeholder="โปรเจกต์นี้ทำอะไร"></textarea></div>
+        <div class="field"><label>Stack ที่ใช้</label><input type="text" id="f-stack" placeholder="เช่น Claude API + React"></div>
+        <div class="field"><label>ทำไมน่าสนใจ</label><textarea id="f-why" placeholder="จุดเด่นที่อยากโชว์"></textarea></div>
+        <div class="field checkbox"><input type="checkbox" id="f-new"><label style="margin:0;">ติดป้าย NEW</label></div>
+        <div class="modal-actions">
+          <button type="button" class="btn danger" id="btnDeleteModule" style="display:none;">ลบโปรเจกต์นี้</button>
+          <div class="right">
+            <button type="button" class="btn ghost" id="btnCancelModule">ยกเลิก</button>
+            <button type="submit" class="btn">บันทึก</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: generic (checklist / foundation / timeline / tips / meta) -->
+  <div class="modal-backdrop" id="modalGenericBackdrop">
+    <div class="modal brackets">
+      <span class="bl"></span><span class="br"></span>
+      <h3 id="modalGenericTitle" class="mono">แก้ไขรายการ</h3>
+      <form id="genericForm">
+        <div id="genericFields"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn danger" id="btnDeleteGeneric" style="display:none;">ลบรายการนี้</button>
+          <div class="right">
+            <button type="button" class="btn ghost" id="btnCancelGeneric">ยกเลิก</button>
+            <button type="submit" class="btn">บันทึก</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // ---------------------------------------------------------------
+  // The in-memory `state` object below is just the client-side copy.
+  // The real source of truth is data.json on the server (see
+  // server.js) — every add/edit/delete calls persist() to save it
+  // there, and every browser polls the server every few seconds so
+  // teammates' changes show up automatically. Export/Import JSON is
+  // still there as a manual backup option.
+  // ---------------------------------------------------------------
+  const DEFAULT_STATE = {
+    hero: {
+      eyebrow: "PROJECT BLUEPRINT · REV.A · TEAM BUILD",
+      title: "Roadmap สร้างพอร์ตโฟลิโอ\n+ คลังโปรเจกต์ AI กับเพื่อน",
+      subtitle: "แผนการทำงานแบบเป็นขั้นเป็นตอน เริ่มจากเว็บโชว์ผลงานที่ดึงโปรเจกต์จาก GitHub มาโชว์เคส แล้วค่อยๆ เติมโปรเจกต์ AI เล็กๆ เข้าไปทีละชิ้น เพื่อสร้างพอร์ตที่ทั้งลึกและกว้าง",
+      meta: [
+        {num:"1", label:"โปรเจกต์หลัก (Portfolio)"},
+        {num:"10", label:"โมดูล AI ให้เลือกทำ"},
+        {num:"~12", label:"สัปดาห์ (แผนแนะนำ)"}
+      ]
+    },
+    checklist: [
+      "ตั้ง GitHub Organization หรือ repo กลาง แยก repo ต่อโปรเจกต์",
+      "ตกลง tech stack หลัก (เช่น React/Next.js + Claude API)",
+      "ตั้งบอร์ดงาน (Trello/GitHub Projects) แบ่ง To do / Doing / Done",
+      "ตกลง branch strategy สั้นๆ (main + feature branch)",
+      "ตั้งกลุ่มคุย + นัด sync รายสัปดาห์",
+      "เลือกโดเมน/ที่ deploy ฟรี (Vercel, Netlify, GitHub Pages)"
+    ],
+    foundation: [
+      {title:"ออกแบบโครงหน้าเว็บ", desc:"วาง wireframe คร่าวๆ: หน้าแรก (Hero + สรุปตัวตน), หน้าโปรเจกต์ (การ์ดผลงาน), หน้า About, ลิงก์ GitHub/Contact", tag:"Figma / กระดาษก็ได้"},
+      {title:"เลือกธีมและตัวตนของเว็บ", desc:"อย่าใช้เทมเพลตดาวน์โหลด — เลือกโทนสี/ฟอนต์ที่สะท้อนสไตล์ทีม จะช่วยให้พอร์ตจำง่ายกว่าคนอื่น", tag:""},
+      {title:"สร้างระบบการ์ดโปรเจกต์แบบ dynamic", desc:"ทำให้การ์ดโปรเจกต์ดึงข้อมูลจากไฟล์ JSON/Markdown เดียว พอทำโปรเจกต์ใหม่เสร็จ แค่เพิ่ม entry ไม่ต้องแก้โค้ดหน้าเว็บ", tag:"Next.js + MDX/JSON"},
+      {title:"เชื่อมกับ GitHub", desc:"ใช้ GitHub API ดึง stars/README หรือแค่ลิงก์ตรงไป repo แต่ละอัน พร้อม demo link ถ้ามี", tag:""},
+      {title:"Deploy + ทดสอบ responsive", desc:"ขึ้น Vercel/Netlify ผูกโดเมน ทดสอบมือถือ/แท็บเล็ต ก่อนเริ่มลงโปรเจกต์ AI โปรเจกต์แรก", tag:""}
+    ],
+    modules: [
+      {id:"M01", diff:"mid",  name:"AI Debate / Interview Practice Partner", desc:"บอทจำลองสัมภาษณ์งานหรือดีเบต สุ่มคำถามตามหัวข้อ ประเมินคำตอบ ให้ feedback", stack:"Claude API + text-based ก่อน / เพิ่ม speech-to-text ทีหลัง", why:"โชว์ทักษะออกแบบ interaction ไม่ใช่แค่เรียก API ธรรมดา", isNew:false},
+      {id:"M02", diff:"easy", name:"AI ช่วยหาวิจัย/บทความ", desc:"ป้อนหัวข้อ ให้ AI ช่วยค้นและสรุปบทความ/งานวิจัยที่เกี่ยวข้อง พร้อมลิงก์อ้างอิง", stack:"Claude API + web search tool", why:"ใช้งานได้จริงกับตัวเอง เอาไว้ทำการบ้าน/รีเสิร์ชโปรเจกต์อื่นต่อได้เลย", isNew:false},
+      {id:"M03", diff:"easy", name:"AI ช่วยร่างพรอมป์ท (Prompt Optimizer)", desc:"ช่วยแปลงคำสั่งของผู้ใช้ให้กระชับ ชัดเจน ลดจำนวน token ก่อนส่งเข้า API จริง", stack:"Claude API (small/cheap model) + rule-based trimming", why:"เป็นเครื่องมือ meta ที่ช่วยประหยัดต้นทุนให้โปรเจกต์อื่นๆ ในพอร์ตด้วย", isNew:false},
+      {id:"M04", diff:"hard", name:"AI ติดตามออเดอร์ร้านอาหาร", desc:"ลูกค้าสั่งอาหารแล้วดูสถานะออเดอร์แบบเรียลไทม์ (กำลังทำ/เสร็จแล้ว) พร้อมแจ้งเตือน", stack:"WebSocket/Firebase realtime DB + แดชบอร์ดร้านค้า", why:"ฝึกระบบสถานะแบบเรียลไทม์ ต่อยอดเป็นระบบจริงให้ร้านค้าได้", isNew:false},
+      {id:"M05", diff:"mid",  name:"AI แชทบอทร้านอาหาร", desc:"บอทตอบคำถามเมนู แนะนำอาหารตามความชอบ/งบ และรับออเดอร์ผ่านแชท", stack:"Claude API + ฐานข้อมูลเมนู (RAG แบบง่าย)", why:"ต่อยอดจาก M04 ได้ กลายเป็นระบบร้านอาหารครบวงจร", isNew:false},
+      {id:"M06", diff:"easy", name:"AI ปรับ Resume ให้ตรงกับประกาศงาน", desc:"วางเรซูเม่ + JD แล้ว AI ช่วยปรับคำ เน้นทักษะที่ตรง พร้อมให้คะแนนความเข้ากันแบบ ATS", stack:"Claude API + PDF parsing", why:"ใช้ได้จริงตอนสมัครงานเอง เป็นโปรเจกต์ที่ demo ให้กรรมการเห็นผลลัพธ์ทันที", isNew:true},
+      {id:"M07", diff:"mid",  name:"AI Code Review Buddy", desc:"บอทรีวิว Pull Request บน GitHub อัตโนมัติ ชี้จุดเสี่ยง บั๊ก และแนะนำโค้ดสไตล์ที่ดีขึ้น", stack:"Claude API + GitHub Webhook/Actions", why:"ใช้ได้กับ repo ของทีมเองทุกวัน โชว์ว่าเข้าใจ dev workflow จริง", isNew:true},
+      {id:"M08", diff:"easy", name:"AI สร้าง Flashcard สำหรับติว", desc:"อัปโหลดสไลด์/เอกสาร แล้วให้ AI สร้างชุดคำถาม-คำตอบและ quiz แบบ spaced repetition", stack:"Claude API + PDF/slide parsing", why:"ใช้ติวสอบได้เองระหว่างทำโปรเจกต์อื่น เป็นตัวอย่าง edtech ที่ทำเสร็จไว", isNew:true},
+      {id:"M09", diff:"mid",  name:"สแกนใบเสร็จ + สรุปรายจ่าย", desc:"ถ่ายรูปใบเสร็จ ระบบ OCR แล้ว AI จัดหมวดหมู่ค่าใช้จ่ายอัตโนมัติ พร้อมแดชบอร์ดสรุปรายเดือน", stack:"OCR (Tesseract/Vision API) + Claude สำหรับจัดหมวด + chart.js", why:"รวม 3 ทักษะในโปรเจกต์เดียว: image processing, AI classification, data viz", isNew:true},
+      {id:"M10", diff:"hard", name:"AI สรุปประชุม + แจกงาน", desc:"อัปโหลดไฟล์เสียงประชุม ระบบถอดเสียงแล้ว AI สรุปประเด็นและดึง action items ส่งเข้า Slack/Notion อัตโนมัติ", stack:"Speech-to-text + Claude API + Slack/Notion API", why:"เป็นโปรเจกต์ที่ integrate หลาย service เข้าด้วยกัน โชว์ทักษะ automation แบบครบวงจร", isNew:true}
+    ],
+    timeline: [
+      {week:"WK 1-3", label:"พอร์ตโฟลิโอ (Sheet 02)"},
+      {week:"WK 4-5", label:"M06 + M03 (quick wins)"},
+      {week:"WK 6-7", label:"M02 หรือ M08"},
+      {week:"WK 8-9", label:"M01 หรือ M07"},
+      {week:"WK 10-12", label:"M04+M05 หรือ M09/M10"}
+    ],
+    tips: [
+      {key:"// SCOPE เล็กก่อน", text:"แต่ละโมดูลควรทำเวอร์ชัน MVP ให้เสร็จใน 1-2 สัปดาห์ ค่อยกลับมาเพิ่มฟีเจอร์ทีหลัง"},
+      {key:"// README ทุกโปรเจกต์", text:'ใส่ screenshot, วิธีรัน, และ "สิ่งที่ได้เรียนรู้" — กรรมการ/ผู้จ้างงานอ่าน README ก่อนโค้ดเสมอ'},
+      {key:"// แชร์ API key อย่างปลอดภัย", text:"ใช้ .env + .gitignore ทุกครั้ง อย่า commit key ของ Claude API ลง repo สาธารณะ"},
+      {key:"// รีวิวกันเองก่อน deploy", text:"ให้อีกคนลองใช้งานจริงก่อนขึ้นเว็บ จะจับบั๊ก UX ที่คนเขียนเองมองข้ามได้"}
+    ]
+  };
+
+  function clone(x){ return JSON.parse(JSON.stringify(x)); }
+  let state = clone(DEFAULT_STATE); // used only until the server responds, or if the server is unreachable
+
+  const diffLabel = {easy:'ง่าย', mid:'กลาง', hard:'ยาก'};
+  function esc(str){ return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function nl2br(str){ return esc(str).replace(/\n/g,'<br>'); }
+
+  // ------------------------- BACKEND SYNC -------------------------
+  // Every teammate's browser talks to the same server, so an add/edit/
+  // delete made on one machine is saved to data.json on the server and
+  // shows up on everyone else's screen within a few seconds (polling).
+  const syncPill = document.getElementById('syncPill');
+  function setSyncStatus(kind){
+    if(kind === 'ok') syncPill.textContent = '🟢 ซิงค์กับทีมแล้ว';
+    else if(kind === 'saving') syncPill.textContent = '🔄 กำลังบันทึก...';
+    else syncPill.textContent = '🔴 ต่อ backend ไม่ได้ (แก้ไขได้แต่จะไม่ sync — รันผ่าน server.js)';
+  }
+
+  async function persist(){
+    setSyncStatus('saving');
+    try{
+      const res = await fetch('/api/state', {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(state)
+      });
+      if(!res.ok) throw new Error('save failed');
+      setSyncStatus('ok');
+    }catch(err){
+      setSyncStatus('offline');
+    }
+  }
+
+  async function loadFromServer(){
+    try{
+      const res = await fetch('http://localhost:3000');
+      if(!res.ok) throw new Error('bad status');
+      state = await res.json();
+      setSyncStatus('ok');
+    }catch(err){
+      setSyncStatus('offline');
+    }
+    renderAll();
+    startPolling();
+  }
+
+  function startPolling(){
+    setInterval(async () => {
+      const modalOpen = modalModuleBackdrop.classList.contains('open') || modalGenericBackdrop.classList.contains('open');
+      const heroFocused = document.activeElement === heroEyebrow || document.activeElement === heroTitle || document.activeElement === heroSubtitle;
+      if(modalOpen || heroFocused) return; // don't yank the form/text out from under someone mid-edit
+      try{
+        const res = await fetch('http://localhost:3000');
+        if(!res.ok) throw new Error('bad status');
+        const data = await res.json();
+        if(JSON.stringify(data) !== JSON.stringify(state)){
+          state = data;
+          renderAll();
+        }
+        setSyncStatus('ok');
+      }catch(err){
+        setSyncStatus('offline');
+      }
+    }, 5000);
+  }
+
+  // ------------------------- EDIT MODE TOGGLE -------------------------
+  const editToggle = document.getElementById('editToggle');
+  const editToggleLabel = document.getElementById('editToggleLabel');
+  const modePill = document.getElementById('modePill');
+  const heroEyebrow = document.getElementById('heroEyebrow');
+  const heroTitle = document.getElementById('heroTitle');
+  const heroSubtitle = document.getElementById('heroSubtitle');
+
+  function setEditMode(on){
+    document.body.classList.toggle('edit-mode', on);
+    editToggleLabel.textContent = on ? 'ปิดโหมดแก้ไข' : 'เปิดโหมดแก้ไข';
+    modePill.textContent = on ? 'กำลังแก้ไข' : 'โหมดดูอย่างเดียว';
+    [heroEyebrow, heroTitle, heroSubtitle].forEach(el => el.setAttribute('contenteditable', on ? 'true' : 'false'));
+  }
+  editToggle.addEventListener('click', () => setEditMode(!document.body.classList.contains('edit-mode')));
+
+  heroEyebrow.addEventListener('blur', () => { state.hero.eyebrow = heroEyebrow.textContent.trim(); persist(); });
+  heroTitle.addEventListener('blur', () => { state.hero.title = heroTitle.innerText.trim(); persist(); });
+  heroSubtitle.addEventListener('blur', () => { state.hero.subtitle = heroSubtitle.textContent.trim(); persist(); });
+
+  // ------------------------- RENDER: HERO -------------------------
+  function renderHero(){
+    heroEyebrow.textContent = state.hero.eyebrow;
+    heroTitle.innerHTML = nl2br(state.hero.title);
+    heroSubtitle.textContent = state.hero.subtitle;
+    const wrap = document.getElementById('heroMeta');
+    wrap.innerHTML = '';
+    state.hero.meta.forEach((m, idx) => {
+      const div = document.createElement('div');
+      div.className = 'hero-meta-item';
+      div.innerHTML = `
+        <div class="item-actions">
+          <button class="icon-btn edit" data-kind="meta" data-idx="${idx}" title="แก้ไข">✎</button>
+          <button class="icon-btn del" data-kind="meta" data-idx="${idx}" title="ลบ">✕</button>
+        </div>
+        <b>${esc(m.num)}</b>${esc(m.label)}
+      `;
+      wrap.appendChild(div);
+    });
+  }
+
+  // ------------------------- RENDER: CHECKLIST -------------------------
+  function renderChecklist(){
+    const wrap = document.getElementById('checklistGrid');
+    wrap.innerHTML = '';
+    state.checklist.forEach((text, idx) => {
+      const div = document.createElement('div');
+      div.className = 'check-item';
+      div.innerHTML = `
+        <div class="box"></div>
+        <div>${esc(text)}</div>
+        <div class="item-actions">
+          <button class="icon-btn edit" data-kind="checklist" data-idx="${idx}" title="แก้ไข">✎</button>
+          <button class="icon-btn del" data-kind="checklist" data-idx="${idx}" title="ลบ">✕</button>
+        </div>
+      `;
+      wrap.appendChild(div);
+    });
+  }
+
+  // ------------------------- RENDER: FOUNDATION -------------------------
+  function renderFoundation(){
+    const wrap = document.getElementById('foundationList');
+    wrap.innerHTML = '';
+    state.foundation.forEach((step, idx) => {
+      const div = document.createElement('div');
+      div.className = 'f-step';
+      div.setAttribute('data-n', idx + 1);
+      div.innerHTML = `
+        <div class="item-actions">
+          <button class="icon-btn edit" data-kind="foundation" data-idx="${idx}" title="แก้ไข">✎</button>
+          <button class="icon-btn del" data-kind="foundation" data-idx="${idx}" title="ลบ">✕</button>
+        </div>
+        <h3>${esc(step.title)}</h3>
+        <p>${esc(step.desc)}</p>
+        ${step.tag ? `<span class="tag">${esc(step.tag)}</span>` : ''}
+      `;
+      wrap.appendChild(div);
+    });
+  }
+
+  // ------------------------- RENDER: MODULES -------------------------
+  function renderModules(){
+    const grid = document.getElementById('moduleGrid');
+    const empty = document.getElementById('libEmpty');
+    grid.innerHTML = '';
+    empty.style.display = state.modules.length === 0 ? 'block' : 'none';
+    state.modules.forEach((m, idx) => {
+      const card = document.createElement('div');
+      card.className = 'card brackets';
+      card.innerHTML = `
+        <span class="bl"></span><span class="br"></span>
+        <div class="item-actions">
+          <button class="icon-btn edit" data-kind="module" data-idx="${idx}" title="แก้ไข">✎</button>
+          <button class="icon-btn del" data-kind="module" data-idx="${idx}" title="ลบ">✕</button>
+        </div>
+        ${m.isNew ? '<span class="new-badge">NEW</span>' : ''}
+        <div class="card-top"><span class="card-id">${esc(m.id)}</span><span class="diff ${m.diff}">${diffLabel[m.diff]}</span></div>
+        <h3>${esc(m.name)}</h3>
+        <p>${esc(m.desc)}</p>
+        ${m.stack ? `<div class="stack"><b>Stack:</b> ${esc(m.stack)}</div>` : ''}
+        ${m.why ? `<div class="why"><b>น่าสนใจ:</b> ${esc(m.why)}</div>` : ''}
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // ------------------------- RENDER: TIMELINE -------------------------
+  function renderTimeline(){
+    const wrap = document.getElementById('timelineTrack');
+    wrap.innerHTML = '';
+    state.timeline.forEach((t, idx) => {
+      const div = document.createElement('div');
+      div.className = 't-week';
+      div.innerHTML = `
+        <div class="item-actions">
+          <button class="icon-btn edit" data-kind="timeline" data-idx="${idx}" title="แก้ไข">✎</button>
+          <button class="icon-btn del" data-kind="timeline" data-idx="${idx}" title="ลบ">✕</button>
+        </div>
+        <div class="wk">${esc(t.week)}</div>
+        <div class="lbl">${esc(t.label)}</div>
+      `;
+      wrap.appendChild(div);
+    });
+  }
+
+  // ------------------------- RENDER: TIPS -------------------------
+  function renderTips(){
+    const wrap = document.getElementById('tipsGrid');
+    wrap.innerHTML = '';
+    state.tips.forEach((tip, idx) => {
+      const div = document.createElement('div');
+      div.className = 'tip';
+      div.innerHTML = `
+        <span class="k mono">${esc(tip.key)}</span>
+        <p>${esc(tip.text)}</p>
+        <div class="item-actions">
+          <button class="icon-btn edit" data-kind="tips" data-idx="${idx}" title="แก้ไข">✎</button>
+          <button class="icon-btn del" data-kind="tips" data-idx="${idx}" title="ลบ">✕</button>
+        </div>
+      `;
+      wrap.appendChild(div);
+    });
+  }
+
+  function renderAll(){
+    renderHero(); renderChecklist(); renderFoundation(); renderModules(); renderTimeline(); renderTips();
+  }
+
+  // ------------------------- MODULE MODAL -------------------------
+  const modalModuleBackdrop = document.getElementById('modalModuleBackdrop');
+  const moduleForm = document.getElementById('moduleForm');
+  const modalModuleTitle = document.getElementById('modalModuleTitle');
+  const btnDeleteModule = document.getElementById('btnDeleteModule');
+  let editingModuleIdx = null;
+
+  function nextModuleId(){
+    let n = 1;
+    const used = new Set(state.modules.map(m => m.id));
+    while(used.has('M' + String(n).padStart(2,'0'))) n++;
+    return 'M' + String(n).padStart(2,'0');
+  }
+
+  function openModuleModal(idx){
+    editingModuleIdx = (idx === undefined) ? null : idx;
+    const mod = editingModuleIdx !== null ? state.modules[editingModuleIdx] : null;
+    modalModuleTitle.textContent = mod ? `แก้ไขโปรเจกต์ ${mod.id}` : 'เพิ่มโปรเจกต์ใหม่';
+    document.getElementById('f-name').value = mod ? mod.name : '';
+    document.getElementById('f-diff').value = mod ? mod.diff : 'mid';
+    document.getElementById('f-desc').value = mod ? mod.desc : '';
+    document.getElementById('f-stack').value = mod ? mod.stack : '';
+    document.getElementById('f-why').value = mod ? mod.why : '';
+    document.getElementById('f-new').checked = mod ? !!mod.isNew : false;
+    btnDeleteModule.style.display = mod ? 'inline-block' : 'none';
+    modalModuleBackdrop.classList.add('open');
+    document.getElementById('f-name').focus();
+  }
+  function closeModuleModal(){ modalModuleBackdrop.classList.remove('open'); editingModuleIdx = null; }
+
+  document.getElementById('btnAddModule').addEventListener('click', () => openModuleModal());
+  document.getElementById('btnCancelModule').addEventListener('click', closeModuleModal);
+  modalModuleBackdrop.addEventListener('click', e => { if(e.target === modalModuleBackdrop) closeModuleModal(); });
+  btnDeleteModule.addEventListener('click', () => {
+    if(editingModuleIdx !== null && confirm(`ลบโปรเจกต์ "${state.modules[editingModuleIdx].name}" ใช่ไหม?`)){
+      state.modules.splice(editingModuleIdx, 1);
+      closeModuleModal(); renderModules(); persist();
+    }
+  });
+  moduleForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById('f-name').value.trim(),
+      diff: document.getElementById('f-diff').value,
+      desc: document.getElementById('f-desc').value.trim(),
+      stack: document.getElementById('f-stack').value.trim(),
+      why: document.getElementById('f-why').value.trim(),
+      isNew: document.getElementById('f-new').checked,
+    };
+    if(!data.name || !data.desc) return;
+    if(editingModuleIdx !== null){
+      state.modules[editingModuleIdx] = {...state.modules[editingModuleIdx], ...data};
+    } else {
+      state.modules.push({id: nextModuleId(), ...data});
+    }
+    closeModuleModal(); renderModules(); persist();
+  });
+
+  // ------------------------- GENERIC MODAL (checklist/foundation/timeline/tips/meta) -------------------------
+  const FIELD_CONFIGS = {
+    checklist: [{key:'text', label:'ข้อความ', type:'textarea'}],
+    foundation: [{key:'title', label:'หัวข้อขั้นตอน', type:'text'}, {key:'desc', label:'รายละเอียด', type:'textarea'}, {key:'tag', label:'แท็ก (ถ้ามี เช่นชื่อเครื่องมือ)', type:'text'}],
+    timeline: [{key:'week', label:'ช่วงเวลา (เช่น WK 1-3)', type:'text'}, {key:'label', label:'สิ่งที่ทำช่วงนี้', type:'text'}],
+    tips: [{key:'key', label:'หัวข้อสั้นๆ (แบบคอมเมนต์โค้ด)', type:'text'}, {key:'text', label:'รายละเอียด', type:'textarea'}],
+    meta: [{key:'num', label:'ตัวเลข', type:'text'}, {key:'label', label:'คำอธิบายใต้ตัวเลข', type:'text'}],
+  };
+  const TITLES = {
+    checklist:{add:'เพิ่มรายการเตรียมทีม', edit:'แก้ไขรายการ'},
+    foundation:{add:'เพิ่มขั้นตอน', edit:'แก้ไขขั้นตอน'},
+    timeline:{add:'เพิ่มช่วงเวลา', edit:'แก้ไขช่วงเวลา'},
+    tips:{add:'เพิ่มเคล็ดลับ', edit:'แก้ไขเคล็ดลับ'},
+    meta:{add:'เพิ่มตัวเลขสรุป', edit:'แก้ไขตัวเลขสรุป'},
+  };
+
+  const modalGenericBackdrop = document.getElementById('modalGenericBackdrop');
+  const genericForm = document.getElementById('genericForm');
+  const genericFields = document.getElementById('genericFields');
+  const modalGenericTitle = document.getElementById('modalGenericTitle');
+  const btnDeleteGeneric = document.getElementById('btnDeleteGeneric');
+  let currentKind = null;
+  let currentIdx = null;
+
+  function getArray(kind){
+    if(kind === 'meta') return state.hero.meta;
+    return state[kind];
+  }
+
+  function openGenericModal(kind, idx){
+    currentKind = kind;
+    currentIdx = (idx === undefined) ? null : idx;
+    const arr = getArray(kind);
+    const item = currentIdx !== null ? arr[currentIdx] : null;
+    modalGenericTitle.textContent = item ? TITLES[kind].edit : TITLES[kind].add;
+    genericFields.innerHTML = '';
+    FIELD_CONFIGS[kind].forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'field';
+      const val = item ? (kind === 'checklist' ? item : item[f.key]) : '';
+      const fieldValue = kind === 'checklist' ? (item || '') : (item ? item[f.key] : '');
+      if(f.type === 'textarea'){
+        div.innerHTML = `<label>${f.label}</label><textarea data-field="${f.key}">${esc(fieldValue)}</textarea>`;
+      } else {
+        div.innerHTML = `<label>${f.label}</label><input type="text" data-field="${f.key}" value="${esc(fieldValue)}">`;
+      }
+      genericFields.appendChild(div);
+    });
+    btnDeleteGeneric.style.display = item ? 'inline-block' : 'none';
+    modalGenericBackdrop.classList.add('open');
+    const firstInput = genericFields.querySelector('input,textarea');
+    if(firstInput) firstInput.focus();
+  }
+  function closeGenericModal(){ modalGenericBackdrop.classList.remove('open'); currentKind = null; currentIdx = null; }
+
+  document.getElementById('btnAddChecklist').addEventListener('click', () => openGenericModal('checklist'));
+  document.getElementById('btnAddFoundation').addEventListener('click', () => openGenericModal('foundation'));
+  document.getElementById('btnAddTimeline').addEventListener('click', () => openGenericModal('timeline'));
+  document.getElementById('btnAddTip').addEventListener('click', () => openGenericModal('tips'));
+  document.getElementById('btnAddMeta').addEventListener('click', () => openGenericModal('meta'));
+  document.getElementById('btnCancelGeneric').addEventListener('click', closeGenericModal);
+  modalGenericBackdrop.addEventListener('click', e => { if(e.target === modalGenericBackdrop) closeGenericModal(); });
+
+  btnDeleteGeneric.addEventListener('click', () => {
+    if(currentIdx === null) return;
+    if(confirm('ลบรายการนี้ใช่ไหม?')){
+      const kind = currentKind;
+      const arr = getArray(kind);
+      arr.splice(currentIdx, 1);
+      closeGenericModal();
+      renderByKind(kind);
+      persist();
+    }
+  });
+
+  genericForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const inputs = genericFields.querySelectorAll('[data-field]');
+    const values = {};
+    inputs.forEach(inp => { values[inp.dataset.field] = inp.value.trim(); });
+    const arr = getArray(currentKind);
+    let newItem;
+    if(currentKind === 'checklist'){
+      newItem = values.text;
+      if(!newItem) return;
+    } else {
+      newItem = values;
+      if(currentKind === 'foundation' && (!newItem.title || !newItem.desc)) return;
+      if(currentKind === 'timeline' && (!newItem.week || !newItem.label)) return;
+      if(currentKind === 'tips' && (!newItem.key || !newItem.text)) return;
+      if(currentKind === 'meta' && (!newItem.num || !newItem.label)) return;
+    }
+    if(currentIdx !== null){ arr[currentIdx] = newItem; } else { arr.push(newItem); }
+    const kindDone = currentKind;
+    closeGenericModal();
+    renderByKind(kindDone);
+    persist();
+  });
+
+  function renderByKind(kind){
+    if(kind === 'checklist') renderChecklist();
+    else if(kind === 'foundation') renderFoundation();
+    else if(kind === 'timeline') renderTimeline();
+    else if(kind === 'tips') renderTips();
+    else if(kind === 'meta') renderHero();
+  }
+
+  // event delegation for edit/delete icon buttons across sections
+  document.addEventListener('click', e => {
+    const editBtn = e.target.closest('.icon-btn.edit');
+    const delBtn = e.target.closest('.icon-btn.del');
+    if(editBtn){
+      const kind = editBtn.dataset.kind;
+      const idx = parseInt(editBtn.dataset.idx, 10);
+      if(kind === 'module') openModuleModal(idx);
+      else openGenericModal(kind, idx);
+    } else if(delBtn){
+      const kind = delBtn.dataset.kind;
+      const idx = parseInt(delBtn.dataset.idx, 10);
+      if(kind === 'module'){
+        if(confirm(`ลบโปรเจกต์ "${state.modules[idx].name}" ใช่ไหม?`)){
+          state.modules.splice(idx, 1);
+          renderModules(); persist();
+        }
+      } else {
+        const arr = getArray(kind);
+        if(confirm('ลบรายการนี้ใช่ไหม?')){
+          arr.splice(idx, 1);
+          renderByKind(kind); persist();
+        }
+      }
+    }
+  });
+
+  // ------------------------- GLOBAL EXPORT / IMPORT / RESET -------------------------
+  document.getElementById('btnExportAll').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'roadmap-data.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('fileImportAll').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try{
+        const parsed = JSON.parse(evt.target.result);
+        if(!parsed || typeof parsed !== 'object') throw new Error('bad format');
+        state = {
+          hero: parsed.hero && typeof parsed.hero === 'object' ? {
+            eyebrow: parsed.hero.eyebrow || DEFAULT_STATE.hero.eyebrow,
+            title: parsed.hero.title || DEFAULT_STATE.hero.title,
+            subtitle: parsed.hero.subtitle || DEFAULT_STATE.hero.subtitle,
+            meta: Array.isArray(parsed.hero.meta) ? parsed.hero.meta : clone(DEFAULT_STATE.hero.meta),
+          } : clone(DEFAULT_STATE.hero),
+          checklist: Array.isArray(parsed.checklist) ? parsed.checklist : clone(DEFAULT_STATE.checklist),
+          foundation: Array.isArray(parsed.foundation) ? parsed.foundation : clone(DEFAULT_STATE.foundation),
+          modules: Array.isArray(parsed.modules) ? parsed.modules : clone(DEFAULT_STATE.modules),
+          timeline: Array.isArray(parsed.timeline) ? parsed.timeline : clone(DEFAULT_STATE.timeline),
+          tips: Array.isArray(parsed.tips) ? parsed.tips : clone(DEFAULT_STATE.tips),
+        };
+        renderAll();
+        persist(); // push the imported data to the shared server so teammates see it too
+      }catch(err){
+        alert('ไฟล์ JSON ไม่ถูกต้อง กรุณาใช้ไฟล์ที่ export จากหน้านี้');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('btnResetAll').addEventListener('click', async () => {
+    if(!confirm('รีเซ็ตข้อมูลทั้งหน้ากลับเป็นค่าเริ่มต้น สำหรับทุกคนในทีม? การแก้ไขปัจจุบันที่ยังไม่ได้ export จะหายไป')) return;
+    try{
+      const res = await fetch('/api/state/reset', { method: 'POST' });
+      if(!res.ok) throw new Error('reset failed');
+      state = await res.json();
+      setSyncStatus('ok');
+    }catch(err){
+      // backend unreachable — fall back to a local-only reset
+      state = clone(DEFAULT_STATE);
+      setSyncStatus('offline');
+    }
+    renderAll();
+  });
+
+  loadFromServer();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "team-roadmap-app",
+  "version": "1.0.0",
+  "description": "Interactive team roadmap with a shared backend so edits sync across everyone's machine",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

@@ -1,0 +1,197 @@
+{
+  "hero": {
+    "eyebrow": "PROJECT BLUEPRINT · REV.A · TEAM BUILD",
+    "title": "Roadmap สร้างพอร์ตโฟลิโอ\n+ คลังโปรเจกต์ AI กับเพื่อน",
+    "subtitle": "แผนการทำงานแบบเป็นขั้นเป็นตอน เริ่มจากเว็บโชว์ผลงานที่ดึงโปรเจกต์จาก GitHub มาโชว์เคส แล้วค่อยๆ เติมโปรเจกต์ AI เล็กๆ เข้าไปทีละชิ้น เพื่อสร้างพอร์ตที่ทั้งลึกและกว้าง",
+    "meta": [
+      {
+        "num": "1",
+        "label": "โปรเจกต์หลัก (Portfolio)"
+      },
+      {
+        "num": "10",
+        "label": "โมดูล AI ให้เลือกทำ"
+      },
+      {
+        "num": "~12",
+        "label": "สัปดาห์ (แผนแนะนำ)"
+      }
+    ]
+  },
+  "checklist": [
+    "ตั้ง GitHub Organization หรือ repo กลาง แยก repo ต่อโปรเจกต์",
+    "ตกลง tech stack หลัก (เช่น React/Next.js + Claude API)",
+    "ตั้งบอร์ดงาน (Trello/GitHub Projects) แบ่ง To do / Doing / Done",
+    "ตกลง branch strategy สั้นๆ (main + feature branch)",
+    "ตั้งกลุ่มคุย + นัด sync รายสัปดาห์",
+    "เลือกโดเมน/ที่ deploy ฟรี (Vercel, Netlify, GitHub Pages)"
+  ],
+  "foundation": [
+    {
+      "title": "ออกแบบโครงหน้าเว็บ",
+      "desc": "วาง wireframe คร่าวๆ: หน้าแรก (Hero + สรุปตัวตน), หน้าโปรเจกต์ (การ์ดผลงาน), หน้า About, ลิงก์ GitHub/Contact",
+      "tag": "Figma / กระดาษก็ได้"
+    },
+    {
+      "title": "เลือกธีมและตัวตนของเว็บ",
+      "desc": "อย่าใช้เทมเพลตดาวน์โหลด — เลือกโทนสี/ฟอนต์ที่สะท้อนสไตล์ทีม จะช่วยให้พอร์ตจำง่ายกว่าคนอื่น",
+      "tag": ""
+    },
+    {
+      "title": "สร้างระบบการ์ดโปรเจกต์แบบ dynamic",
+      "desc": "ทำให้การ์ดโปรเจกต์ดึงข้อมูลจากไฟล์ JSON/Markdown เดียว พอทำโปรเจกต์ใหม่เสร็จ แค่เพิ่ม entry ไม่ต้องแก้โค้ดหน้าเว็บ",
+      "tag": "Next.js + MDX/JSON"
+    },
+    {
+      "title": "เชื่อมกับ GitHub",
+      "desc": "ใช้ GitHub API ดึง stars/README หรือแค่ลิงก์ตรงไป repo แต่ละอัน พร้อม demo link ถ้ามี",
+      "tag": ""
+    },
+    {
+      "title": "Deploy + ทดสอบ responsive",
+      "desc": "ขึ้น Vercel/Netlify ผูกโดเมน ทดสอบมือถือ/แท็บเล็ต ก่อนเริ่มลงโปรเจกต์ AI โปรเจกต์แรก",
+      "tag": ""
+    }
+  ],
+  "modules": [
+    {
+      "id": "M01",
+      "diff": "mid",
+      "name": "AI Debate / Interview Practice Partner",
+      "desc": "บอทจำลองสัมภาษณ์งานหรือดีเบต สุ่มคำถามตามหัวข้อ ประเมินคำตอบ ให้ feedback",
+      "stack": "Claude API + text-based ก่อน / เพิ่ม speech-to-text ทีหลัง",
+      "why": "โชว์ทักษะออกแบบ interaction ไม่ใช่แค่เรียก API ธรรมดา",
+      "isNew": false
+    },
+    {
+      "id": "M02",
+      "diff": "easy",
+      "name": "AI ช่วยหาวิจัย/บทความ",
+      "desc": "ป้อนหัวข้อ ให้ AI ช่วยค้นและสรุปบทความ/งานวิจัยที่เกี่ยวข้อง พร้อมลิงก์อ้างอิง",
+      "stack": "Claude API + web search tool",
+      "why": "ใช้งานได้จริงกับตัวเอง เอาไว้ทำการบ้าน/รีเสิร์ชโปรเจกต์อื่นต่อได้เลย",
+      "isNew": false
+    },
+    {
+      "id": "M03",
+      "diff": "easy",
+      "name": "AI ช่วยร่างพรอมป์ท (Prompt Optimizer)",
+      "desc": "ช่วยแปลงคำสั่งของผู้ใช้ให้กระชับ ชัดเจน ลดจำนวน token ก่อนส่งเข้า API จริง",
+      "stack": "Claude API (small/cheap model) + rule-based trimming",
+      "why": "เป็นเครื่องมือ meta ที่ช่วยประหยัดต้นทุนให้โปรเจกต์อื่นๆ ในพอร์ตด้วย",
+      "isNew": false
+    },
+    {
+      "id": "M04",
+      "diff": "hard",
+      "name": "AI ติดตามออเดอร์ร้านอาหาร",
+      "desc": "ลูกค้าสั่งอาหารแล้วดูสถานะออเดอร์แบบเรียลไทม์ (กำลังทำ/เสร็จแล้ว) พร้อมแจ้งเตือน",
+      "stack": "WebSocket/Firebase realtime DB + แดชบอร์ดร้านค้า",
+      "why": "ฝึกระบบสถานะแบบเรียลไทม์ ต่อยอดเป็นระบบจริงให้ร้านค้าได้",
+      "isNew": false
+    },
+    {
+      "id": "M05",
+      "diff": "mid",
+      "name": "AI แชทบอทร้านอาหาร",
+      "desc": "บอทตอบคำถามเมนู แนะนำอาหารตามความชอบ/งบ และรับออเดอร์ผ่านแชท",
+      "stack": "Claude API + ฐานข้อมูลเมนู (RAG แบบง่าย)",
+      "why": "ต่อยอดจาก M04 ได้ กลายเป็นระบบร้านอาหารครบวงจร",
+      "isNew": false
+    },
+    {
+      "id": "M06",
+      "diff": "easy",
+      "name": "AI ปรับ Resume ให้ตรงกับประกาศงาน",
+      "desc": "วางเรซูเม่ + JD แล้ว AI ช่วยปรับคำ เน้นทักษะที่ตรง พร้อมให้คะแนนความเข้ากันแบบ ATS",
+      "stack": "Claude API + PDF parsing",
+      "why": "ใช้ได้จริงตอนสมัครงานเอง เป็นโปรเจกต์ที่ demo ให้กรรมการเห็นผลลัพธ์ทันที",
+      "isNew": true
+    },
+    {
+      "id": "M07",
+      "diff": "mid",
+      "name": "AI Code Review Buddy",
+      "desc": "บอทรีวิว Pull Request บน GitHub อัตโนมัติ ชี้จุดเสี่ยง บั๊ก และแนะนำโค้ดสไตล์ที่ดีขึ้น",
+      "stack": "Claude API + GitHub Webhook/Actions",
+      "why": "ใช้ได้กับ repo ของทีมเองทุกวัน โชว์ว่าเข้าใจ dev workflow จริง",
+      "isNew": true
+    },
+    {
+      "id": "M08",
+      "diff": "easy",
+      "name": "AI สร้าง Flashcard สำหรับติว",
+      "desc": "อัปโหลดสไลด์/เอกสาร แล้วให้ AI สร้างชุดคำถาม-คำตอบและ quiz แบบ spaced repetition",
+      "stack": "Claude API + PDF/slide parsing",
+      "why": "ใช้ติวสอบได้เองระหว่างทำโปรเจกต์อื่น เป็นตัวอย่าง edtech ที่ทำเสร็จไว",
+      "isNew": true
+    },
+    {
+      "id": "M09",
+      "diff": "mid",
+      "name": "สแกนใบเสร็จ + สรุปรายจ่าย",
+      "desc": "ถ่ายรูปใบเสร็จ ระบบ OCR แล้ว AI จัดหมวดหมู่ค่าใช้จ่ายอัตโนมัติ พร้อมแดชบอร์ดสรุปรายเดือน",
+      "stack": "OCR (Tesseract/Vision API) + Claude สำหรับจัดหมวด + chart.js",
+      "why": "รวม 3 ทักษะในโปรเจกต์เดียว: image processing, AI classification, data viz",
+      "isNew": true
+    },
+    {
+      "id": "M10",
+      "diff": "hard",
+      "name": "AI สรุปประชุม + แจกงาน",
+      "desc": "อัปโหลดไฟล์เสียงประชุม ระบบถอดเสียงแล้ว AI สรุปประเด็นและดึง action items ส่งเข้า Slack/Notion อัตโนมัติ",
+      "stack": "Speech-to-text + Claude API + Slack/Notion API",
+      "why": "เป็นโปรเจกต์ที่ integrate หลาย service เข้าด้วยกัน โชว์ทักษะ automation แบบครบวงจร",
+      "isNew": true
+    },
+    {
+      "id": "M11",
+      "name": "ดก",
+      "diff": "mid",
+      "desc": "ดก",
+      "stack": "ดก",
+      "why": "ดก",
+      "isNew": false
+    }
+  ],
+  "timeline": [
+    {
+      "week": "WK 1-3",
+      "label": "พอร์ตโฟลิโอ (Sheet 02)"
+    },
+    {
+      "week": "WK 4-5",
+      "label": "M06 + M03 (quick wins)"
+    },
+    {
+      "week": "WK 6-7",
+      "label": "M02 หรือ M08"
+    },
+    {
+      "week": "WK 8-9",
+      "label": "M01 หรือ M07"
+    },
+    {
+      "week": "WK 10-12",
+      "label": "M04+M05 หรือ M09/M10"
+    }
+  ],
+  "tips": [
+    {
+      "key": "// SCOPE เล็กก่อน",
+      "text": "แต่ละโมดูลควรทำเวอร์ชัน MVP ให้เสร็จใน 1-2 สัปดาห์ ค่อยกลับมาเพิ่มฟีเจอร์ทีหลัง"
+    },
+    {
+      "key": "// README ทุกโปรเจกต์",
+      "text": "ใส่ screenshot, วิธีรัน, และ \"สิ่งที่ได้เรียนรู้\" — กรรมการ/ผู้จ้างงานอ่าน README ก่อนโค้ดเสมอ"
+    },
+    {
+      "key": "// แชร์ API key อย่างปลอดภัย",
+      "text": "ใช้ .env + .gitignore ทุกครั้ง อย่า commit key ของ Claude API ลง repo สาธารณะ"
+    },
+    {
+      "key": "// รีวิวกันเองก่อน deploy",
+      "text": "ให้อีกคนลองใช้งานจริงก่อนขึ้นเว็บ จะจับบั๊ก UX ที่คนเขียนเองมองข้ามได้"
+    }
+  ]
+}
